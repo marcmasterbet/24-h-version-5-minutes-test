@@ -1,5 +1,5 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Mission Essai 5 min</title>
+<title>Mission Essai 1 min</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Share+Tech+Mono&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap">
 <style>
@@ -51,14 +51,31 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 .shake{animation:shake .9s cubic-bezier(.36,.07,.19,.97)}
 @keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-9px,5px) rotate(-.6deg)}40%,60%{transform:translate(9px,-5px) rotate(.6deg)}}
 @media (prefers-reduced-motion:reduce){.shake{animation:none}}
+#glass{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:55}
+.verdict{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);z-index:70;box-sizing:border-box;width:min(calc(100vw - 32px),420px);
+  background:rgba(6,6,7,.86);border:1px solid color-mix(in srgb,var(--gold) 70%,transparent);border-radius:12px;padding:22px 20px;
+  text-align:center;display:grid;gap:14px;box-shadow:0 0 0 1px rgba(0,0,0,.6),0 20px 60px rgba(0,0,0,.7);animation:vin .7s cubic-bezier(.2,.8,.2,1)}
+.verdict p{margin:0;font-size:clamp(16px,4.4vw,19px);line-height:1.45}
+.verdict strong{display:block;font-family:var(--display);font-size:1.15em;letter-spacing:.04em;margin-bottom:4px}
+.verdict .ok strong{color:var(--gold)}
+.verdict .ko strong{color:var(--red);text-shadow:0 0 10px rgba(255,42,30,.45)}
+.verdict hr{border:0;border-top:1px solid color-mix(in srgb,var(--gold) 35%,transparent);margin:0 15%}
+@keyframes vin{from{opacity:0;transform:translate(-50%,-50%) scale(.85)}to{opacity:1;transform:translate(-50%,-50%) scale(1)}}
+@media (prefers-reduced-motion:reduce){.verdict{animation:none}}
 </style>
+<canvas id="glass" aria-hidden="true"></canvas>
+<div class="verdict" id="verdict" role="alert" hidden>
+  <p class="ok"><strong>Agent présent à l'heure ?</strong>Félicitations, première mission accomplie.</p>
+  <hr>
+  <p class="ko"><strong>Agent absent ?</strong>Trop tard. Première mission échouée.</p>
+</div>
 <canvas id="boom" aria-hidden="true"></canvas>
 <div id="flash" aria-hidden="true"></div>
 
 <div class="wrap" id="app">
   <div class="head">
     <h1>TOP SECRET</h1>
-    <p>Dossier · Groupe WhatsApp<span style="display:block;margin-top:6px;color:var(--red)">Essai 5 min</span></p>
+    <p>Dossier · Groupe WhatsApp<span style="display:block;margin-top:6px;color:var(--red)">Essai 1 min</span></p>
   </div>
   <div class="mission" id="mission">
     <h2>Mission n° 1 — si tu l'acceptes…</h2>
@@ -73,7 +90,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
       <div class="labels"><span>Heures</span><span>Min</span><span>Sec</span></div>
       <div class="digits" role="timer" aria-live="off">
         <div class="ghost">88:88:88<small>.88</small></div>
-        <div class="live" id="t">00:05:00<small>.00</small></div>
+        <div class="live" id="t">00:01:00<small>.00</small></div>
       </div>
     </div>
   </div>
@@ -84,9 +101,9 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 
 <script>
 // Mission starts Wed 11 Nov 2026, 09:00 Paris, and runs exactly 24 h
-// TEST VERSION: 5-minute countdown starting when the page opens
+// TEST VERSION: 1-minute countdown starting when the page opens
 const START = Date.now();
-const END = START + 5*60*1000;
+const END = START + 60*1000;
 document.querySelectorAll(".hfin").forEach(e => e.textContent = new Date(END).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":"," h "));
 const el = document.getElementById("t"), app = document.getElementById("app");
 const fmt = d => new Date(d).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Paris"}) + " (Paris)";
@@ -112,7 +129,7 @@ function tick(){
   if (ms === 0 && !app.classList.contains("done")) {
     app.classList.add("done");
     msg.hidden = false;
-    explode();
+    endSequence();
     msg.innerHTML = "Compte à rebours terminé<b>Mission en cours</b>";
   }
   requestAnimationFrame(tick);
@@ -182,6 +199,83 @@ function explode(){
     if (alive || t < 1.2) requestAnimationFrame(frame); else g.clearRect(0,0,W,H);
   }
   requestAnimationFrame(frame);
+}
+// Shattered screen after the explosion
+let glassSeed = 0;
+function rng(seed){ return () => { seed = (seed*16807) % 2147483647; return (seed-1)/2147483646; }; }
+function drawGlass(progress){
+  const cv = document.getElementById("glass"), g = cv.getContext("2d");
+  const dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
+  if (cv.width !== W*dpr || cv.height !== H*dpr) { cv.width = W*dpr; cv.height = H*dpr; }
+  g.setTransform(dpr,0,0,dpr,0,0); g.clearRect(0,0,W,H);
+  const r = rng(glassSeed);
+  const ox = W*(.38 + r()*.24), oy = H*(.30 + r()*.2);
+  const maxR = Math.hypot(Math.max(ox,W-ox), Math.max(oy,H-oy)) + 40;
+  const radii = [0]; let rr = 10; while (rr < maxR) { radii.push(rr); rr = rr*1.45 + 12 + r()*10; } radii.push(maxR);
+  const n = 15 + Math.floor(r()*5), lines = [];
+  for (let i = 0; i < n; i++) {
+    const base = (i + r()*.6) / n * Math.PI*2; let a = base;
+    lines.push(radii.map((R,k) => { a += (r()-.5)*.16; return [ox + Math.cos(a)*R, oy + Math.sin(a)*R]; }));
+  }
+  const grow = progress * maxR;
+  // facets
+  for (let i = 0; i < n; i++) {
+    const A = lines[i], B = lines[(i+1)%n];
+    for (let k = 0; k < radii.length-1; k++) {
+      const shade = r();
+      if (radii[k] > grow) continue;
+      g.fillStyle = shade < .5 ? `rgba(255,255,255,${.015+shade*.05})` : `rgba(0,0,0,${(shade-.5)*.18})`;
+      g.beginPath(); g.moveTo(...A[k]); g.lineTo(...A[k+1]); g.lineTo(...B[k+1]); g.lineTo(...B[k]); g.closePath(); g.fill();
+    }
+  }
+  const stroke = (pts, w, a) => {
+    g.lineWidth = w + 1.2; g.strokeStyle = `rgba(0,0,0,${a*.55})`; g.beginPath(); pts.forEach((q,j) => j ? g.lineTo(q[0]+.8,q[1]+.8) : g.moveTo(q[0]+.8,q[1]+.8)); g.stroke();
+    g.lineWidth = w; g.strokeStyle = `rgba(235,245,255,${a})`; g.beginPath(); pts.forEach((q,j) => j ? g.lineTo(q[0],q[1]) : g.moveTo(q[0],q[1])); g.stroke();
+  };
+  g.lineJoin = "round"; g.lineCap = "round";
+  // radial cracks
+  for (const L of lines) {
+    const pts = []; for (let k = 0; k < L.length; k++) { if (radii[k] > grow) break; pts.push(L[k]); }
+    if (pts.length > 1) stroke(pts, 1.3, .8);
+  }
+  // ring cracks
+  for (let k = 1; k < radii.length-1; k++) {
+    if (radii[k] > grow) break;
+    for (let i = 0; i < n; i++) {
+      if (r() > (k < 4 ? .95 : .55)) continue;
+      const A = lines[i][k], B = lines[(i+1)%n][k];
+      const mx = (A[0]+B[0])/2 + (r()-.5)*radii[k]*.08, my = (A[1]+B[1])/2 + (r()-.5)*radii[k]*.08;
+      stroke([A,[mx,my],B], k < 3 ? 1.1 : .9, k < 3 ? .75 : .55);
+    }
+  }
+  // impact point
+  const imp = g.createRadialGradient(ox,oy,0,ox,oy,34);
+  imp.addColorStop(0,"rgba(255,255,255,.95)"); imp.addColorStop(.35,"rgba(230,240,255,.45)"); imp.addColorStop(1,"rgba(230,240,255,0)");
+  g.fillStyle = imp; g.beginPath(); g.arc(ox,oy,34,0,7); g.fill();
+}
+function shatter(){
+  glassSeed = 1 + Math.floor(Math.random()*2147483000);
+  if (ctx) crackSound();
+  if (navigator.vibrate) try { navigator.vibrate(120); } catch(_) {}
+  app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
+  const reduceM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceM) { drawGlass(1); return; }
+  const t0 = performance.now();
+  (function step(now){ const k = Math.min(1,(now-t0)/380); drawGlass(1 - Math.pow(1-k,3)); if (k < 1) requestAnimationFrame(step); })(t0);
+}
+addEventListener("resize", () => { if (glassSeed) drawGlass(1); });
+function crackSound(){
+  const len = .5, buf = ctx.createBuffer(1, ctx.sampleRate*len, ctx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 6) * (Math.random() < .3 ? 1 : .35);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const hp = ctx.createBiquadFilter(); hp.type = "highpass"; hp.frequency.value = 2500;
+  const gn = ctx.createGain(); gn.gain.value = 1.2;
+  src.connect(hp).connect(gn).connect(ctx.destination); src.start();
+}
+function endSequence(){
+  explode();
+  setTimeout(shatter, 1700);
+  setTimeout(() => { document.getElementById("verdict").hidden = false; }, 2700);
 }
 function boomSound(){
   const len = 2.5, buf = ctx.createBuffer(1, ctx.sampleRate*len, ctx.sampleRate), d = buf.getChannelData(0);
