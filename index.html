@@ -1,0 +1,235 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Mission Essai 5 min</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;800&family=Share+Tech+Mono&family=IBM+Plex+Sans+Condensed:wght@400;600&display=swap">
+<style>
+/* Layout: one-screen dossier, radar scope behind a red LED countdown, single dark look */
+:root{
+  --bg:#060607; --panel:#120505; --ink:#e9e6df; --mute:#8d887d;
+  --gold:#d4b25f; --red:#ff2a1e; --ghost:#3a0b08;
+  --display:"Cinzel",Georgia,serif;
+  --digits:"Share Tech Mono",ui-monospace,Menlo,monospace;
+  --body:"IBM Plex Sans Condensed","Arial Narrow",system-ui,sans-serif;
+  color-scheme:dark;
+}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);overflow-x:hidden;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,rgba(0,0,0,.28) 0 1px,transparent 1px 4px)}
+.wrap{min-height:100%;box-sizing:border-box;max-width:620px;margin:0 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:clamp(14px,3vh,28px);text-align:center;padding-block:16px}
+.head h1{font-family:var(--display);font-weight:800;color:var(--gold);letter-spacing:.18em;margin:0;font-size:clamp(28px,8vw,46px)}
+.head p{margin:8px 0 0;color:var(--mute);letter-spacing:.22em;text-transform:uppercase;font-size:12px;border-top:1px solid color-mix(in srgb,var(--gold) 50%,transparent);padding-top:8px}
+.scope{position:relative;width:100%;display:grid;place-items:center;aspect-ratio:1/0.72;max-width:100%}
+.scope canvas{position:absolute;inset:0;width:100%;height:100%}
+.panel{position:relative;box-sizing:border-box;background:color-mix(in srgb,var(--panel) 92%,transparent);border:2px solid #6e1510;border-radius:12px;padding:12px 14px 16px;width:100%;box-shadow:0 0 40px rgba(255,42,30,.12)}
+.labels{display:grid;grid-template-columns:repeat(3,1fr);font-size:11px;letter-spacing:.2em;color:#b0463b;text-transform:uppercase;padding-inline:4%}
+.dot{position:absolute;top:12px;right:14px;width:9px;height:9px;border-radius:50%;background:var(--red);box-shadow:0 0 8px var(--red);animation:blink 1s steps(1) infinite}
+@keyframes blink{50%{opacity:.15}}
+.digits{position:relative;font-family:var(--digits);font-size:clamp(44px,15vw,96px);line-height:1.05;font-variant-numeric:tabular-nums;white-space:nowrap}
+.digits .ghost{color:var(--ghost)}
+.digits .live{position:absolute;inset:0;color:var(--red);text-shadow:0 0 6px var(--red),0 0 22px rgba(255,42,30,.6)}
+.digits small{font-size:.42em}
+.msg{margin:0;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-size:clamp(15px,4vw,20px)}
+.msg b{display:block;color:var(--red);font-family:var(--display);font-size:1.55em;letter-spacing:.06em;margin-top:4px;text-shadow:0 0 12px rgba(255,42,30,.5)}
+.mission{width:100%;box-sizing:border-box;border:1px solid color-mix(in srgb,var(--gold) 45%,transparent);border-radius:10px;padding:16px 18px;display:grid;gap:10px;background:color-mix(in srgb,var(--panel) 70%,transparent)}
+.mission h2{margin:0;font-family:var(--display);color:var(--gold);font-size:clamp(17px,4.6vw,22px);letter-spacing:.06em;text-wrap:balance}
+.mission p{margin:0;font-size:clamp(15px,4vw,18px);line-height:1.45}
+.mission strong{color:var(--gold);font-weight:600}
+.mission .warn{color:var(--red);font-weight:600;text-transform:uppercase;letter-spacing:.06em;text-shadow:0 0 10px rgba(255,42,30,.4)}
+.foot{font-size:13px;color:var(--mute);letter-spacing:.06em}
+.foot strong{color:var(--gold);font-weight:600}
+button{font:600 12px var(--body);letter-spacing:.2em;text-transform:uppercase;color:var(--gold);background:transparent;border:1px solid color-mix(in srgb,var(--gold) 60%,transparent);border-radius:999px;padding:8px 16px;cursor:pointer}
+button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+.done .live{animation:blink .5s steps(1) infinite}
+@media (prefers-reduced-motion:reduce){.dot,.done .live{animation:none}}
+[hidden]{display:none!important}
+#boom{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:50}
+#flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:60}
+#flash.go{animation:flash 1.4s ease-out forwards}
+@keyframes flash{0%{opacity:1;background:#fff}12%{opacity:.95;background:#ffd27a}40%{opacity:.5;background:#ff3a14}100%{opacity:0;background:#ff3a14}}
+.shake{animation:shake .9s cubic-bezier(.36,.07,.19,.97)}
+@keyframes shake{10%,90%{transform:translate(-2px,1px)}20%,80%{transform:translate(5px,-3px)}30%,50%,70%{transform:translate(-9px,5px) rotate(-.6deg)}40%,60%{transform:translate(9px,-5px) rotate(.6deg)}}
+@media (prefers-reduced-motion:reduce){.shake{animation:none}}
+</style>
+<canvas id="boom" aria-hidden="true"></canvas>
+<div id="flash" aria-hidden="true"></div>
+
+<div class="wrap" id="app">
+  <div class="head">
+    <h1>TOP SECRET</h1>
+    <p>Dossier · Groupe WhatsApp · <span style="color:var(--red)">Essai 5 min</span></p>
+  </div>
+  <div class="mission" id="mission">
+    <h2>Mission n° 1 — si tu l'acceptes…</h2>
+    <p>Être au <strong>Manava à Anglet</strong>, le <strong>jeudi 12 novembre</strong>, avant <strong>9 h précises</strong>.</p>
+    <p>À 9 h, le compte à rebours atteint zéro.</p>
+    <p class="warn">Si tu n'es pas là, ta première mission aura échoué !</p>
+  </div>
+  <div class="scope">
+    <canvas id="radar"></canvas>
+    <div class="panel">
+      <span class="dot" aria-hidden="true"></span>
+      <div class="labels"><span>Heures</span><span>Min</span><span>Sec</span></div>
+      <div class="digits" role="timer" aria-live="off">
+        <div class="ghost">88:88:88<small>.88</small></div>
+        <div class="live" id="t">00:05:00<small>.00</small></div>
+      </div>
+    </div>
+  </div>
+  <p class="msg" id="msg">Ce message s'autodétruira<b>dans 24 heures</b></p>
+  <div class="foot" hidden><span id="lbl"></span><strong id="end"></strong></div>
+  <button id="snd" type="button">Activer le tic-tac</button>
+</div>
+
+<script>
+// Mission starts Wed 11 Nov 2026, 09:00 Paris, and runs exactly 24 h
+// TEST VERSION: 5-minute countdown starting when the page opens
+const START = Date.now();
+const END = START + 5*60*1000;
+const el = document.getElementById("t"), app = document.getElementById("app");
+const fmt = d => new Date(d).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Paris"}) + " (Paris)";
+const lbl = document.getElementById("lbl"), endEl = document.getElementById("end"), msg = document.getElementById("msg");
+const p2 = n => String(n).padStart(2,"0");
+let lastSec = -1, ctx = null, phase = "";
+function setPhase(p){
+  if (p === phase) return; phase = p;
+  if (p === "wait") { lbl.textContent = "Lancement de la mission : "; endEl.textContent = fmt(START);
+    msg.innerHTML = "Mission en attente<b>Activation imminente</b>"; }
+  if (p === "run") { lbl.textContent = "Fin de mission : "; endEl.textContent = fmt(END);
+    msg.hidden = true; }
+}
+function tick(){
+  const now = Date.now();
+  if (now < START) { setPhase("wait"); el.innerHTML = "24:00:00<small>.00</small>"; lastSec = -1; requestAnimationFrame(tick); return; }
+  setPhase("run");
+  const ms = Math.max(0, END - now);
+  const h = Math.floor(ms/3.6e6), m = Math.floor(ms%3.6e6/6e4), s = Math.floor(ms%6e4/1e3), cs = Math.floor(ms%1e3/10);
+  el.innerHTML = `${p2(h)}:${p2(m)}:${p2(s)}<small>.${p2(cs)}</small>`;
+  if (ctx && s !== lastSec && ms > 0) beep();
+  lastSec = s;
+  if (ms === 0 && !app.classList.contains("done")) {
+    app.classList.add("done");
+    msg.hidden = false;
+    explode();
+    msg.innerHTML = "Compte à rebours terminé<b>Mission en cours</b>";
+  }
+  requestAnimationFrame(tick);
+}
+tick();
+
+// Explosion at zero: flash, shake, shockwave, sparks, debris and smoke
+function explode(){
+  const reduceM = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const fl = document.getElementById("flash");
+  fl.classList.remove("go"); void fl.offsetWidth; fl.classList.add("go");
+  if (ctx) boomSound();
+  if (navigator.vibrate) try { navigator.vibrate([300,80,200]); } catch(_) {}
+  if (reduceM) return;
+  app.classList.remove("shake"); void app.offsetWidth; app.classList.add("shake");
+  const cvs = document.getElementById("boom"), g = cvs.getContext("2d");
+  const dpr = devicePixelRatio || 1, W = innerWidth, H = innerHeight;
+  cvs.width = W*dpr; cvs.height = H*dpr; g.setTransform(dpr,0,0,dpr,0,0);
+  const pr = document.querySelector(".panel").getBoundingClientRect();
+  const ox = pr.left + pr.width/2, oy = pr.top + pr.height/2;
+  const parts = [], R = Math.max(W,H);
+  const fire = ["#fff3c4","#ffd27a","#ffb03b","#ff7a1a","#ff3a14","#d4b25f"];
+  for (let i = 0; i < 260; i++) {
+    const a = Math.random()*Math.PI*2, sp = 3 + Math.random()*Math.random()*22;
+    parts.push({x:ox,y:oy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-2,life:1,dec:.006+Math.random()*.014,
+      r:1+Math.random()*3,c:fire[Math.floor(Math.random()*fire.length)],k:"spark"});
+  }
+  for (let i = 0; i < 40; i++) {
+    const a = Math.random()*Math.PI*2, sp = 4 + Math.random()*12;
+    parts.push({x:ox,y:oy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-4,life:1,dec:.006+Math.random()*.006,
+      r:3+Math.random()*7,c:Math.random()<.5?"#2a0806":"#6e1510",k:"debris",rot:Math.random()*6,vr:(Math.random()-.5)*.4});
+  }
+  for (let i = 0; i < 26; i++) {
+    const a = Math.random()*Math.PI*2, sp = .6 + Math.random()*2.4;
+    parts.push({x:ox,y:oy,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp-.6,life:1,dec:.004+Math.random()*.004,
+      r:20+Math.random()*40,c:"smoke",k:"smoke"});
+  }
+  const t0 = performance.now();
+  function frame(now){
+    const t = (now - t0)/1000;
+    g.clearRect(0,0,W,H);
+    // fireball core
+    if (t < 1.2) {
+      const fr = 40 + t*R*0.5, fa = Math.max(0, 1 - t/1.2);
+      const grd = g.createRadialGradient(ox,oy,0,ox,oy,fr);
+      grd.addColorStop(0,`rgba(255,250,220,${fa})`); grd.addColorStop(.35,`rgba(255,160,40,${fa*.85})`);
+      grd.addColorStop(.7,`rgba(255,58,20,${fa*.45})`); grd.addColorStop(1,"rgba(255,58,20,0)");
+      g.fillStyle = grd; g.beginPath(); g.arc(ox,oy,fr,0,7); g.fill();
+    }
+    // shockwave rings
+    [0,.12].forEach(d => { const tt = t - d; if (tt > 0 && tt < 1) {
+      g.strokeStyle = `rgba(255,220,160,${(1-tt)*.8})`; g.lineWidth = 10*(1-tt)+1;
+      g.beginPath(); g.arc(ox,oy,tt*R*.9,0,7); g.stroke(); } });
+    let alive = false;
+    for (const p of parts) {
+      if (p.life <= 0) continue; alive = true;
+      p.x += p.vx; p.y += p.vy; p.life -= p.dec;
+      if (p.k === "smoke") { p.vx *= .985; p.vy = p.vy*.985 - .03; p.r += .5;
+        g.fillStyle = `rgba(40,30,28,${Math.max(0,p.life)*.35})`; g.beginPath(); g.arc(p.x,p.y,p.r,0,7); g.fill(); continue; }
+      p.vx *= .975; p.vy = p.vy*.975 + .22;
+      g.globalAlpha = Math.max(0,p.life);
+      if (p.k === "debris") { p.rot += p.vr; g.save(); g.translate(p.x,p.y); g.rotate(p.rot);
+        g.fillStyle = p.c; g.fillRect(-p.r,-p.r/2,p.r*2,p.r); g.restore(); }
+      else { g.fillStyle = p.c; g.beginPath(); g.arc(p.x,p.y,p.r*Math.max(.3,p.life),0,7); g.fill(); }
+      g.globalAlpha = 1;
+    }
+    if (alive || t < 1.2) requestAnimationFrame(frame); else g.clearRect(0,0,W,H);
+  }
+  requestAnimationFrame(frame);
+}
+function boomSound(){
+  const len = 2.5, buf = ctx.createBuffer(1, ctx.sampleRate*len, ctx.sampleRate), d = buf.getChannelData(0);
+  for (let i = 0; i < d.length; i++) d[i] = (Math.random()*2-1) * Math.pow(1 - i/d.length, 2.5);
+  const src = ctx.createBufferSource(); src.buffer = buf;
+  const lp = ctx.createBiquadFilter(); lp.type = "lowpass";
+  lp.frequency.setValueAtTime(1800, ctx.currentTime); lp.frequency.exponentialRampToValueAtTime(80, ctx.currentTime + 2);
+  const gn = ctx.createGain(); gn.gain.setValueAtTime(1.4, ctx.currentTime);
+  const o = ctx.createOscillator(), og = ctx.createGain();
+  o.frequency.setValueAtTime(110, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(30, ctx.currentTime + 1.2);
+  og.gain.setValueAtTime(.9, ctx.currentTime); og.gain.exponentialRampToValueAtTime(.001, ctx.currentTime + 1.4);
+  src.connect(lp).connect(gn).connect(ctx.destination); o.connect(og).connect(ctx.destination);
+  src.start(); o.start(); o.stop(ctx.currentTime + 1.5);
+}
+function beep(){
+  const o = ctx.createOscillator(), g = ctx.createGain();
+  o.frequency.value = 1000; g.gain.setValueAtTime(.12, ctx.currentTime);
+  g.gain.exponentialRampToValueAtTime(.0001, ctx.currentTime + .05);
+  o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + .06);
+}
+document.getElementById("snd").addEventListener("click", e => {
+  if (ctx) { ctx.close(); ctx = null; e.target.textContent = "Activer le tic-tac"; return; }
+  try { ctx = new (window.AudioContext || window.webkitAudioContext)(); e.target.textContent = "Couper le son"; } catch(_) {}
+});
+try { navigator.wakeLock?.request("screen").catch(()=>{}); } catch(_) {}
+
+// Radar scope
+const cv = document.getElementById("radar"), c = cv.getContext("2d");
+const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+function draw(t){
+  const r = devicePixelRatio || 1, w = cv.clientWidth, hgt = cv.clientHeight;
+  if (cv.width !== w*r) { cv.width = w*r; cv.height = hgt*r; }
+  c.setTransform(r,0,0,r,0,0); c.clearRect(0,0,w,hgt);
+  const cx = w/2, cy = hgt/2, R = Math.min(w,hgt)/2 - 6;
+  c.strokeStyle = "rgba(212,178,95,.35)"; c.lineWidth = 1;
+  [1,.78,.56,.34].forEach(k => { c.beginPath(); c.arc(cx,cy,R*k,0,7); c.stroke(); });
+  for (let a = 0; a < 360; a += 10) {
+    const rad = a*Math.PI/180, L = a%30 ? 5 : 11;
+    c.beginPath(); c.moveTo(cx+Math.cos(rad)*R, cy+Math.sin(rad)*R);
+    c.lineTo(cx+Math.cos(rad)*(R-L), cy+Math.sin(rad)*(R-L)); c.stroke();
+  }
+  const base = reduce ? 0 : (t/1000*2) % (Math.PI*2);
+  for (let k = 0; k < 40; k++) {
+    c.fillStyle = `rgba(212,178,95,${.22*(1-k/40)})`;
+    c.beginPath(); c.moveTo(cx,cy); c.arc(cx,cy,R,base-(k+1)*.026,base-k*.026); c.fill();
+  }
+  if (!reduce) requestAnimationFrame(draw);
+}
+requestAnimationFrame(draw);
+</script>
+
+</body></html>
