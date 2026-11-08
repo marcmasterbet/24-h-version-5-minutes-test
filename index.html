@@ -58,12 +58,12 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 <div class="wrap" id="app">
   <div class="head">
     <h1>TOP SECRET</h1>
-    <p>Dossier · Groupe WhatsApp · <span style="color:var(--red)">Essai 5 min</span></p>
+    <p>Dossier · Groupe WhatsApp<span style="display:block;margin-top:6px;color:var(--red)">Essai 5 min</span></p>
   </div>
   <div class="mission" id="mission">
     <h2>Mission n° 1 — si tu l'acceptes…</h2>
-    <p>Être au <strong>Manava à Anglet</strong>, le <strong>jeudi 12 novembre</strong>, avant <strong>9 h précises</strong>.</p>
-    <p>À 9 h, le compte à rebours atteint zéro.</p>
+    <p>Être au <strong>Manava à Anglet</strong>, <strong>aujourd'hui</strong>, avant <strong class="hfin">--:--</strong> précises.</p>
+    <p>À <span class="hfin">--:--</span>, le compte à rebours atteint zéro.</p>
     <p class="warn">Si tu n'es pas là, ta première mission aura échoué !</p>
   </div>
   <div class="scope">
@@ -87,6 +87,7 @@ button:focus-visible{outline:2px solid var(--gold);outline-offset:3px}
 // TEST VERSION: 5-minute countdown starting when the page opens
 const START = Date.now();
 const END = START + 5*60*1000;
+document.querySelectorAll(".hfin").forEach(e => e.textContent = new Date(END).toLocaleTimeString("fr-FR",{hour:"2-digit",minute:"2-digit"}).replace(":"," h "));
 const el = document.getElementById("t"), app = document.getElementById("app");
 const fmt = d => new Date(d).toLocaleString("fr-FR",{weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit",timeZone:"Europe/Paris"}) + " (Paris)";
 const lbl = document.getElementById("lbl"), endEl = document.getElementById("end"), msg = document.getElementById("msg");
